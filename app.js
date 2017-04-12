@@ -1,22 +1,44 @@
-/* Import das configurações do servidor */
+/* importar as configurações do servidor */
 var app = require('./config/server');
 
-/* Porta de acesso ao server */
+/* parametrizar a porta de escuta */
 var server = app.listen(3000, function() {
-    console.log("Servidor online");
-});
+    console.log('Servidor online');
+})
 
-/* Servidor Socket*/
 var io = require('socket.io').listen(server);
 
 app.set('io', io);
 
-/* Criar conexão por websocket */
+/* criar a conexão por websocket */
 io.on('connection', function(socket) {
-    console.log('Usuário Conectou');
+    console.log('Usuário conectou');
 
     socket.on('disconnect', function() {
-        console.log("O usuário desconectou");
+        console.log('Usuário desconectou');
+    });
+
+    socket.on('msgParaServidor', function(data) {
+
+        /* dialogo */
+        socket.emit(
+            'msgParaCliente', { apelido: 'Você', mensagem: data.mensagem }
+        );
+
+        socket.broadcast.emit(
+            'msgParaCliente', { apelido: data.apelido, mensagem: data.mensagem }
+        );
+
+        /* participantes */
+        if (parseInt(data.apelido_atualizado_nos_clientes) == 0) {
+            socket.emit(
+                'participantesParaCliente', { apelido: 'Você' }
+            );
+
+            socket.broadcast.emit(
+                'participantesParaCliente', { apelido: data.apelido }
+            );
+        }
     });
 
 });
