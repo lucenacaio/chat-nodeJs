@@ -10,7 +10,7 @@
 		
 		<!-- bootstrap - link cdn -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-	
+		<script src="http://wedgies.github.io/jquery-emoji-picker/js/jquery.emojipicker.js"></script>
 		<!-- estilo -->
 		<link href="css/style.css" rel="stylesheet">
 		
@@ -45,20 +45,28 @@
 		<div class="menu">
             <div class="back"><i class="fa fa-chevron-left"></i> <img src="images/multiroom_chat.png" draggable="false"/></div>
             <div class="name">MultiChat Room</div>
+			<div class="last" id="status"></div>
         </div>
     <ol class="chat" id="dialogos">
     
     </ol>
     <input class="textarea" type="text" placeholder="Escreva sua mensagem aqui!" id="mensagem"/><div class="emojis"></div>	
 	<input type="hidden" value="<%=dadosForm.apelido%>" id="apelido" >
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
 			var socket = io('http://10.30.109.9:3000');
+
  			socket.on('connect', function(msg){
         			socket.emit('join', $('#apelido').val());
     		});
+
+			 
+      $('#trigger').click(function(e) {
+        e.preventDefault();
+        $('#question').emojiPicker('toggle');
+      });
 			function chatClick(){
 
 				socket.emit(
@@ -77,18 +85,19 @@
 			$('#enviar_mensagem').click(chatClick);
 
 			$('#mensagem').on('keydown', function (event) {
-    			if (event.keyCode !== 13) return;
+    			if (event.keyCode !== 13) {
+					socket.emit("enviado", {
+                   		 apelido:  $('#apelido').val()
+                	});
+					return;
+				}
+				socket.emit("recebido");
 				chatClick();
 			});
 
 			socket.on('msgParaCliente', function(data){
 				var html = '';
  				var time = new Date();
-				// html += '<div class="dialogo">';
-				// 	html += '<h4>' + data.apelido + '</h4>';
-				// 	html += '<p>' + data.mensagem + '</p>';
-				// 	html += '<time>' + time.getHours() + ':' + time.getMinutes() + '</time>';
-				// html += '</div>';
 					html += '<li class="'+ data.estilo+'">'
         				html += '<div class="avatar"><img src="images/multiroom_chat.png" draggable="false"/></div>';
 							html += '<div class="msg">';
@@ -103,17 +112,17 @@
 				window.scrollTo(0, document.body.scrollHeight);
 			});
 
+            socket.on("enviado", function (data) {
+                $("#status").html(data.apelido + " está escrevendo...");
+                setTimeout(function () {
+                    $("#status").html('');
+                }, 5000);
+            });
 
-			socket.on('participantesParaCliente', function(data){
-				var html = '';
-
-				html += '<span class="participante">';
-					html += '<img src="images/ico_usuario.png">';
-					html += data.apelido;
-				html += '</span>';
-
-				$('#pessoas').append(html);
+			socket.on("recebido",function(){
+				$("#status").html('');
 			});
+
 		</script>
 	</body>
 </html>

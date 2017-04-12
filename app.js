@@ -25,7 +25,6 @@ io.on('connection', function(socket) {
 
     socket.on('msgParaServidor', function(data) {
         console.log(data);
-        /* dialogo */
         socket.emit(
             'msgParaCliente', { apelido: 'Você', mensagem: data.mensagem, estilo: 'self' }
         );
@@ -33,17 +32,13 @@ io.on('connection', function(socket) {
         socket.broadcast.emit(
             'msgParaCliente', { apelido: data.apelido, mensagem: data.mensagem, estilo: 'other' }
         );
+    });
 
-        /* participantes */
-        if (parseInt(data.apelido_atualizado_nos_clientes) == 0) {
-            socket.emit(
-                'participantesParaCliente', { apelido: 'Você' }
-            );
-
-            socket.broadcast.emit(
-                'participantesParaCliente', { apelido: data.apelido }
-            );
-        }
+    socket.on("enviado", function(data) {
+        socket.broadcast.emit("enviado", data);
+    });
+    socket.on("recebido", function() {
+        socket.broadcast.emit("recebido");
     });
 
 });
