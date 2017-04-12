@@ -24,14 +24,14 @@ io.on('connection', function(socket) {
     });
 
     socket.on('msgParaServidor', function(data) {
-
+        console.log(data);
         /* dialogo */
         socket.emit(
-            'msgParaCliente', { apelido: 'Você', mensagem: data.mensagem }
+            'msgParaCliente', { apelido: 'Você', mensagem: data.mensagem, estilo: 'self' }
         );
 
         socket.broadcast.emit(
-            'msgParaCliente', { apelido: data.apelido, mensagem: data.mensagem }
+            'msgParaCliente', { apelido: data.apelido, mensagem: data.mensagem, estilo: 'other' }
         );
 
         /* participantes */

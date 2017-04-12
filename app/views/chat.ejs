@@ -42,75 +42,20 @@
 	<body>
 	
 	
-		<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-			<div class="container">
-				<div class="navbar-header">
-					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1" id="btn_navbar_toggle">
-						<span class="sr-only">Toggle navigation</span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					</button>
-					<a class="navbar-brand" href="#">Multiroom Chat</a>
-				</div>
-				
-				
-				<div class="collapse navbar-collapse" id="navbar-collapse-1">
-					<ul class="nav navbar-nav">
-						<li>
-							<a href="#" id="exibe_chat">Chat</a>
-						</li>
-						<li>
-							<a href="#" id="exibe_participantes">Participantes</a>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</nav>
-	
-		<div class="container">
-            <div class="row conversa" id="conversa">
-				<div class="col-md-1"></div>
-				<div class="col-md-10" id="dialogos">
-				</div>
-				<div class="col-md-1"></div>
-                
-            </div>
-			
-			<div class="row participantes" id="participantes" style="display:none">
-				<div class="col-md-1"></div>
-				<div class="col-md-10" id="pessoas">
-				</div>
-				<div class="col-md-1"></div>
-                
-            </div>
+		<div class="menu">
+            <div class="back"><i class="fa fa-chevron-left"></i> <img src="images/multiroom_chat.png" draggable="false"/></div>
+            <div class="name">MultiChat Room</div>
         </div>
-		
-		<nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
-			<div class="container">
-				<div class="panel-body campo-mensagem">
-				
-					<div class="col-md-12">
-					
-						<div class="input-group">
-							<input type="text" class="form-control" placeholder="Mensagem" id="mensagem">
-							<input type="hidden" value="<%=dadosForm.apelido%>" id="apelido" >
-							<input type="hidden" value="0" id="apelido_atualizado_nos_clientes" >
-							<span class="input-group-btn">
-								<button class="btn btn-default" type="button" id="enviar_mensagem">></button>
-							</span>
-						</div>
-					
-					</div>
-				</div>
-			</div>
-		</nav>		
-		
+    <ol class="chat" id="dialogos">
+    
+    </ol>
+    <input class="textarea" type="text" placeholder="Escreva sua mensagem aqui!" id="mensagem"/><div class="emojis"></div>	
+	<input type="hidden" value="<%=dadosForm.apelido%>" id="apelido" >
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
-			var socket = io('http://localhost:3000');
+			var socket = io('http://10.30.109.9:3000');
  			socket.on('connect', function(msg){
         			socket.emit('join', $('#apelido').val());
     		});
@@ -138,11 +83,20 @@
 
 			socket.on('msgParaCliente', function(data){
 				var html = '';
-
-				html += '<div class="dialogo">';
-					html += '<h4>' + data.apelido + '</h4>';
-					html += '<p>' + data.mensagem + '</p>';
-				html += '</div>';
+ 				var time = new Date();
+				// html += '<div class="dialogo">';
+				// 	html += '<h4>' + data.apelido + '</h4>';
+				// 	html += '<p>' + data.mensagem + '</p>';
+				// 	html += '<time>' + time.getHours() + ':' + time.getMinutes() + '</time>';
+				// html += '</div>';
+					html += '<li class="'+ data.estilo+'">'
+        				html += '<div class="avatar"><img src="images/multiroom_chat.png" draggable="false"/></div>';
+							html += '<div class="msg">';
+							html += '<strong><p>'+ data.apelido +'</p></strong>';
+							html += '<p>'+ data.mensagem + '</p>';
+							html += '<time>'+ time.getHours() + ':' + time.getMinutes() +'</time>';
+      					html += '</div>';
+    				html += '</li>';
 
 				$('#dialogos').append(html);
 
