@@ -12,10 +12,15 @@ app.set('io', io);
 
 /* criar a conexão por websocket */
 io.on('connection', function(socket) {
-    console.log('Usuário conectou');
 
-    socket.on('disconnect', function() {
-        console.log('Usuário desconectou');
+    socket.on('disconnect', function(data) {
+        socket.broadcast.emit(
+            'msgParaCliente', { apelido: socket.name, mensagem: "Saiu do chat" }
+        );
+    });
+
+    socket.on('join', function(name) {
+        socket.name = name;
     });
 
     socket.on('msgParaServidor', function(data) {
