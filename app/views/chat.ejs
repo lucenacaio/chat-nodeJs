@@ -107,6 +107,7 @@
 			});
 
 			socket.on('msgParaCliente', function(data){
+				
 				var html = '';
  				var time = new Date();
 					html += '<li class="'+ data.estilo+'">'
@@ -120,7 +121,7 @@
 
 
 				$('#dialogos').append(html);
-
+				_notificar(data.apelido, data.estilo);
 				window.scrollTo(0, document.body.scrollHeight);
 			});
 
@@ -171,6 +172,22 @@
 				};
 				emojiContainer.appendChild(docFragment);
 			}
+
+			function _notificar(usuario, permissao) {
+				if(permissao !== 'self'){
+					Notification.requestPermission(function() {
+						var notification = new Notification("MultiChat Room", {
+							icon: 'http://i.stack.imgur.com/dmHl0.png',
+							body: usuario + " enviou uma mensagem",
+							vibrate : true
+						});
+						notification.onclick = function() {
+							notification.close();
+							console.log("Notification ", notification);
+						}
+					});
+				}
+			}  
 
 
 			function _showEmoji (msg) {

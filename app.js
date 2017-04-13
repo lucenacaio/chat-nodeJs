@@ -24,7 +24,6 @@ io.on('connection', function(socket) {
     });
 
     socket.on('msgParaServidor', function(data) {
-        console.log(data);
         socket.emit(
             'msgParaCliente', { apelido: 'Você', mensagem: data.mensagem, estilo: 'self' }
         );
