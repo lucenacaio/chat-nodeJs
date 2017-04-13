@@ -50,25 +50,36 @@
     <ol class="chat" id="dialogos">
     
     </ol>
-    <input class="textarea" type="text" placeholder="Escreva sua mensagem aqui!" id="mensagem"/><div class="emojis"></div>	
+	 <div id="emojiWrapper">
+                </div>
+    <input class="textarea" type="text" placeholder="Escreva sua mensagem aqui!" id="mensagem"/><div class="emojis" id="emojiTrigger"></div>	
 	<input type="hidden" value="<%=dadosForm.apelido%>" id="apelido" >
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
 			var socket = io('http://10.30.109.9:3000');
+ 			
+			 initialEmoji();
+			 _initApplication();
 
- 			socket.on('connect', function(msg){
+ 			
+			 socket.on('connect', function(msg){
         			socket.emit('join', $('#apelido').val());
     		});
 
-			 
-      $('#trigger').click(function(e) {
+      $('#emojiTrigger').click(function(e) {
         e.preventDefault();
-        $('#question').emojiPicker('toggle');
+		console.log("Entrou");
+        var target = e.target;
+            if (target.nodeName.toLowerCase() == 'img') {
+                var messageInput = document.getElementById('mensagem');
+                messageInput.focus();
+                messageInput.value = messageInput.value + '[emoji:' + target.title + ']';
+            };
       });
-			function chatClick(){
 
+			function chatClick(){
 				socket.emit(
 					'msgParaServidor',
 					{ 
@@ -102,10 +113,11 @@
         				html += '<div class="avatar"><img src="images/multiroom_chat.png" draggable="false"/></div>';
 							html += '<div class="msg">';
 							html += '<strong><p>'+ data.apelido +'</p></strong>';
-							html += '<p>'+ data.mensagem + '</p>';
+							html += '<p>'+ _showEmoji(data.mensagem) + '</p>';
 							html += '<time>'+ time.getHours() + ':' + time.getMinutes() +'</time>';
       					html += '</div>';
     				html += '</li>';
+
 
 				$('#dialogos').append(html);
 
@@ -122,6 +134,60 @@
 			socket.on("recebido",function(){
 				$("#status").html('');
 			});
+
+
+			function _initApplication(){
+				document.getElementById('emojiWrapper').addEventListener('click', function(e) {
+					var target = e.target;
+					if (target.nodeName.toLowerCase() == 'img') {
+						var messageInput = document.getElementById('mensagem');
+						messageInput.focus();
+						messageInput.value = messageInput.value + '[emoji:' + target.title + ']';
+					};
+				}, false);
+				document.body.addEventListener('click', function(e) {
+          			  var emojiwrapper = document.getElementById('emojiWrapper');
+            			if (e.target != emojiwrapper) {	
+                		emojiwrapper.style.display = 'none';
+            	};
+        		});
+				
+			 document.getElementById('emojiTrigger').addEventListener('click', function(e) {
+            var emojiwrapper = document.getElementById('emojiWrapper');
+            emojiwrapper.style.display = 'block';
+            e.stopPropagation();
+        }, false);
+
+			}
+
+			function initialEmoji(){
+				var emojiContainer = document.getElementById('emojiWrapper'),
+				docFragment = document.createDocumentFragment();
+				for (var i = 69; i > 0; i--) {
+					var emojiItem = document.createElement('img');
+					emojiItem.src = '../content/emoji/' + i + '.gif';
+					emojiItem.title = i;
+					docFragment.appendChild(emojiItem);
+				};
+				emojiContainer.appendChild(docFragment);
+			}
+
+
+			function _showEmoji (msg) {
+        		var match, result = msg,
+            	reg = /\[emoji:\d+\]/g,
+            	emojiIndex,
+            	totalEmojiNum = document.getElementById('emojiWrapper').children.length;
+        		while (match = reg.exec(msg)) {
+            		emojiIndex = match[0].slice(7, -1);
+            		if (emojiIndex > totalEmojiNum) {
+                		result = result.replace(match[0], '[X]');
+            		} else {
+                		result = result.replace(match[0], '<img class="emoji" src="../content/emoji/' + emojiIndex + '.gif" />');
+            		};
+        		};
+        		return result;
+    		}
 
 		</script>
 	</body>
